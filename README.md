@@ -1,9 +1,7 @@
-#### xip-pdns
+#### wiki-pdns
 
-This is the source of the [PowerDNS](http://powerdns.com/) pipe backend adapter powering [xip.io](http://xip.io/).
-
-Install this on your system, adjust [etc/xip-pdns.conf](etc/xip-pdns.conf.example) to your liking, and configure PowerDNS as follows:
+This is the source of the [PowerDNS](http://powerdns.com/) pipe backend adapter powering article.wiki.gd
 
     launch=pipe
-    pipe-command=/path/to/xip-pdns/bin/xip-pdns /path/to/xip-pdns/etc/xip-pdns.conf
+    pipe-command=/path/to/wiki-pdns/bin/wiki-pdns /path/to/wiki-pdns/etc/wiki-pdns.conf
 
