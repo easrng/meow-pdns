@@ -73,8 +73,6 @@ log() {
 #
 XIP_DOMAIN_PATTERN="(^|\.)${XIP_DOMAIN//./\.}\$"
 NS_SUBDOMAIN_PATTERN="^ns-([0-9]+)\$"
-IP_SUBDOMAIN_PATTERN="(^|\.)(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\$"
-BASE36_SUBDOMAIN_PATTERN="(^|\.)([a-z0-9]{1,7})\$"
 
 qtype_is() {
   [ "$QTYPE" = "$1" ] || [ "$QTYPE" = "ANY" ]
@@ -102,11 +100,6 @@ resolve_ns_subdomain() {
   echo "${XIP_NS_ADDRESSES[$index-1]}"
 }
 
-resolve_wiki_subdomain() {
-  [[ "$SUBDOMAIN" =~ $IP_SUBDOMAIN_PATTERN ]] || true
-  echo "${SUBDOMAIN}">>~/test.log
-}
-
 answer_soa_query() {
   send_answer "SOA" "admin.$XIP_DOMAIN ns-1.$XIP_DOMAIN $XIP_TIMESTAMP $XIP_TTL $XIP_TTL $XIP_TTL $XIP_TTL"
 }
@@ -127,12 +120,8 @@ answer_root_a_query() {
   done
 }
 
-answer_subdomain_txt_query_for() {
-  local type="$1"
-  local address="$(resolve_${type}_subdomain)"
-  if [ -n "$address" ]; then
-    send_answer "TXT" '"Usage: articlename.article.wiki.gd"'
-  fi
+answer_wiki() {
+    send_answer "TXT" "$(/home/pi/wiki-pdns/bin/wiki-resolve $SUBDOMAIN)"
 }
 
 
@@ -164,10 +153,10 @@ while read_query; do
       extract_subdomain_from_qname
 
       if subdomain_is_ns; then
-        answer_subdomain_txt_query_for ns
+        send_answer "TXT" '"Usage: articlename.wiki.gd"'
 
       else
-        answer_subdomain_txt_query_for wiki
+        answer_wiki
       fi
     fi
   fi
