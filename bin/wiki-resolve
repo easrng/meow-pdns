@@ -1,0 +1,17 @@
+#!/bin/bash
+
+res=""
+split=`echo $1 | sed -e 's/-/\n/g'` # Split with dash as delimiter
+for word in $split; do
+    word=${word,,} # Lowercase
+    word=${word^} # Uppercase first letter
+    if [ "$res" == "" ]; then
+        res="${word}"
+    else
+        res="${res}_${word}" # Concatenate result
+    fi
+done
+
+pageid="$(curl "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exsentences=1&excontinue=1&titles=$res" 2>/dev/null |jq '.query.pages | to_entries[].value| .pageid')"
+
+curl "https://en.wikipedia.org/w/api.php?format=json&action=query&pageids=${pageid}&exintro=&explaintext=&prop=extracts&exsentences=1" 2>/dev/null|jq '.query.pages | to_entries[].value| .title, "---", (.extract | if . == "" then "Couldn'\''t get article." else . end)'|tr '\n' ' '

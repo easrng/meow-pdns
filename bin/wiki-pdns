@@ -121,7 +121,11 @@ answer_root_a_query() {
 }
 
 answer_wiki() {
-    send_answer "TXT" "$(/home/pi/wiki-pdns/bin/wiki-resolve $SUBDOMAIN)"
+    wiki_reply="$(/home/pi/wiki-pdns/bin/wiki-resolve $SUBDOMAIN)"
+    if [ "$wiki_reply" == "" ]; then
+        wiki_reply='"Oops! we had an error!"'
+    fi
+    send_answer "TXT" "$wiki_reply"
 }
 
 
