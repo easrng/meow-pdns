@@ -3,10 +3,10 @@ set -e
 shopt -s nocasematch
 
 # Increment this timestamp when the contents of the file change.
-XIP_TIMESTAMP="2019102800"
+XIP_TIMESTAMP="2020041600"
 
 # The top-level domain for which the name server is authoritative.
-XIP_DOMAIN="article.wiki.gd"
+XIP_DOMAIN="m3ow.us.to"
 
 # The public IP addresses (e.g. for the web site) of the top-level domain.
 # `A` queries for the top-level domain will return this list of addresses.
@@ -120,12 +120,22 @@ answer_root_a_query() {
   done
 }
 
-answer_wiki() {
-    wiki_reply="$(/home/pi/wiki-pdns/bin/wiki-resolve $SUBDOMAIN)"
-    if [ "$wiki_reply" == "" ]; then
-        wiki_reply='"Oops! we had an error!"'
+answer_meow_a() {
+    meow_reply="$(/home/pi/meow-pdns/bin/meow-resolve A $SUBDOMAIN)"
+    if [ "$meow_reply" == "" ]; then
+        meow_reply='0.0.0.0'
+    else
+        send_answer "A" "$meow_reply"
     fi
-    send_answer "TXT" "$wiki_reply"
+}
+
+answer_meow_cname() {
+    meow_reply="$(/home/pi/meow-pdns/bin/meow-resolve CNAME $SUBDOMAIN)"
+    if [ "$meow_reply" == "" ]; then
+        meow_reply=''
+    else
+        send_answer "CNAME" "$meow_reply"
+    fi
 }
 
 
@@ -153,15 +163,12 @@ while read_query; do
         answer_root_a_query
       fi
 
-    elif qtype_is "TXT"; then
+    elif qtype_is "A"; then
       extract_subdomain_from_qname
-
-      if subdomain_is_ns; then
-        send_answer "TXT" '"Usage: articlename.wiki.gd"'
-
-      else
-        answer_wiki
-      fi
+      answer_meow_a
+    elif qtype_is "CNAME"; then
+      extract_subdomain_from_qname
+      answer_meow_cname
     fi
   fi
 
