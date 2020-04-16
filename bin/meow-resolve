@@ -1,0 +1,2 @@
+#!/bin/bash
+curl "https://meow-dns.glitch.me/query/$1/$2"
